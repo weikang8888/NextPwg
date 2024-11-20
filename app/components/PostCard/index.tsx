@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import PWG from "../../assets/pwg.png";
+import { deletePost } from "../../api";
 
 interface Post {
 	id: number;
@@ -13,9 +14,10 @@ interface Post {
 
 interface PostCardProps {
 	posts: Post[];
+	onDeletePost: (postId: number) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ posts }) => {
+const PostCard: React.FC<PostCardProps> = ({ posts, onDeletePost }) => {
 	return (
 		<div className="row grid grid-cols-3 gap-4">
 			{posts?.map((post) => (
@@ -39,7 +41,9 @@ const PostCard: React.FC<PostCardProps> = ({ posts }) => {
 						<div className="gap-4 flex justify-between mt-4">
 							<button className="w-full rounded-3xl p-[4px] px-[10px] bg-mint">Edit</button>
 							<button className="w-full rounded-3xl p-[4px] px-[10px] bg-primary">View</button>
-							<button className="w-full rounded-3xl p-[4px] px-[10px] bg-danger">Delete</button>
+							<button className="w-full rounded-3xl p-[4px] px-[10px] bg-danger" onClick={() => onDeletePost(post.id)}>
+								Delete
+							</button>
 						</div>
 					</div>
 				</div>
