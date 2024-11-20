@@ -10,7 +10,7 @@ export const login = async (email: string, password: string): Promise<{ token: s
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.message || "Login failed");
+		throw new Error(errorData.error || "Failed to login");
 	}
 
 	return response.json();
@@ -25,7 +25,7 @@ export const register = async (username: string, email: string, password: string
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.message || "Registration failed");
+		throw new Error(errorData.error || "Registration failed");
 	}
 
 	return response.json();
