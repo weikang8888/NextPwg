@@ -7,94 +7,98 @@ import PostCard from "./components/PostCard";
 import { getAllAccounts, getAllPosts, getUserPosts } from "./api";
 import { jwtDecode } from "jwt-decode";
 interface Post {
-  id: number;
-  userId: number;
-  title: string;
-  body: string;
-  date: string;
-  tags: string[];
+	id: number;
+	userId: number;
+	title: string;
+	body: string;
+	date: string;
+	tags: string[];
 }
 
 export default function Home() {
-  const [userPosts, setUserPosts] = useState<Post[]>([]);
-  const [totalPosts, setTotalPosts] = useState<number>(0);
-  const [myTotalPosts, setMyTotalPosts] = useState<number>(0);
-  const [totalAccounts, setTotalAccounts] = useState<number>(0);
-  const [role, setRole] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+	const [userPosts, setUserPosts] = useState<Post[]>([]);
+	const [totalPosts, setTotalPosts] = useState<number>(0);
+	const [myTotalPosts, setMyTotalPosts] = useState<number>(0);
+	const [totalAccounts, setTotalAccounts] = useState<number>(0);
+	const [role, setRole] = useState<string>("");
+	const [loading, setLoading] = useState<boolean>(false);
+	const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
 
-  const token = localStorage.getItem("token");
-  const page = 1;
-  const limit = 10;
+	const token = localStorage.getItem("token");
+	const page = 1;
+	const limit = 10;
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      if (!token) {
-        setError("User is not logged in");
-        return;
-      }
+	useEffect(() => {
+		const token = localStorage.getItem("token");
 
-      try {
-        const decodedToken: any = jwtDecode(token as string);
-        setRole(decodedToken.role);
+		if (!token) {
+			router.push("/login");
+			return;
+		}
 
-        setLoading(true);
+		const fetchPosts = async () => {
+			try {
+				// Decode token to get user role
+				const decodedToken: any = jwtDecode(token);
+				setRole(decodedToken.role);
 
-        const userPostsResponse = await getUserPosts(token as string, page, limit);
-        setUserPosts(userPostsResponse.data || []);
-        setMyTotalPosts(userPostsResponse.totalPosts || 0);
+				// Fetch user posts
+				const page = 1;
+				const limit = 10;
+				const userPostsResponse = await getUserPosts(token, page, limit);
+				setUserPosts(userPostsResponse.data || []);
+				setMyTotalPosts(userPostsResponse.totalPosts || 0);
 
-        if (decodedToken.role === "admin") {
-          const allPostsResponse = await getAllPosts(token as string, page, limit);
-          setTotalPosts(allPostsResponse.totalPosts || 0);
-          const getAllAccountsResponse = await getAllAccounts(token as string);
-          setTotalAccounts(getAllAccountsResponse.accounts.length);
-        }
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+				// If the user is admin, fetch additional data
+				if (decodedToken.role === "admin") {
+					const allPostsResponse = await getAllPosts(token, page, limit);
+					setTotalPosts(allPostsResponse.totalPosts || 0);
 
-    fetchPosts();
-  }, [token]);
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+					const allAccountsResponse = await getAllAccounts(token);
+					setTotalAccounts(allAccountsResponse.accounts.length || 0);
+				}
+			} catch (err: any) {
+				setError(err.message || "Failed to fetch data");
+			} finally {
+				setLoading(false);
+			}
+		};
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+		fetchPosts();
+	}, [router]);
 
-  return (
-    <div className="container mx-auto px-4">
-      <header className="flex justify-between items-center py-5">
-        <button type="button" className="bg-primary px-4 py-2 rounded-3xl">
-          Add New Post
-        </button>
-        <span
-          className="text-danger cursor-pointer"
-          onClick={() => {
-            router.push("/login");
-          }}>
-          Logout
-        </span>
-      </header>
+	if (loading) {
+		return <div>Loading...</div>;
+	}
 
-      <div className="text-center mt-3 mb-4 text-4xl">Post List</div>
+	return (
+		<div className="container mx-auto px-4">
+			<header className="flex justify-between items-center py-5">
+				<button type="button" className="bg-primary px-4 py-2 rounded-3xl">
+					Add New Post
+				</button>
+				<span
+					className="text-danger cursor-pointer"
+					onClick={() => {
+						localStorage.removeItem("token");
+						router.push("/login");
+					}}>
+					Logout
+				</span>
+			</header>
 
-      {role === "admin" && (
-        <TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />
-      )}
+			<div className="text-center mt-3 mb-4 text-4xl">Post List</div>
 
-      <PostCard posts={userPosts} />
+			{role === "admin" && (
+				<TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />
+			)}
 
-      <div className="flex justify-center p-5">
-        <button className="rounded-md p-[5px] px-[9px] ms-3 bg-primary">1</button>
-      </div>
-    </div>
-  );
+			<PostCard posts={userPosts} />
+
+			<div className="flex justify-center p-5">
+				<button className="rounded-md p-[5px] px-[9px] ms-3 bg-primary">1</button>
+			</div>
+		</div>
+	);
 }
