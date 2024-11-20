@@ -42,7 +42,7 @@ export const getAllAccounts = async (token: string): Promise<{ accounts: [] }> =
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.message || "Failed to fetch accounts");
+		throw new Error(errorData.error || "Failed to fetch accounts");
 	}
 
 	return response.json();
@@ -63,7 +63,7 @@ export const getAllPosts = async (
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.message || "Failed to fetch posts");
+		throw new Error(errorData.error || "Failed to fetch posts");
 	}
 
 	return response.json();
@@ -85,7 +85,24 @@ export const getUserPosts = async (
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		throw new Error(errorData.message || "Failed to fetch user posts");
+		throw new Error(errorData.error || "Failed to fetch user posts");
+	}
+
+	return response.json();
+};
+
+export const deletePost = async (postId: number): Promise<{}> => {
+	const response = await fetch(`${BASE_URL}/posts/delete/${postId}`, {
+		method: "DELETE",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${localStorage.getItem("token")}`,
+		},
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw new Error(errorData.error || "Failed to delete post");
 	}
 
 	return response.json();

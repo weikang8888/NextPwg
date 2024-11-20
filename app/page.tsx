@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TotalPost from "./components/TotalPost";
 import PostCard from "./components/PostCard";
-import { getAllAccounts, getAllPosts, getUserPosts } from "./api";
+import { deletePost, getAllAccounts, getAllPosts, getUserPosts } from "./api";
 import { jwtDecode } from "jwt-decode";
 interface Post {
 	id: number;
@@ -68,6 +68,19 @@ export default function Home() {
 		fetchPosts();
 	}, [router]);
 
+	const handleDeletePost = async (postId: number) => {
+		try {
+			await deletePost(postId);
+			setUserPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+			setMyTotalPosts((prev) => prev - 1);
+			if (role === "admin") {
+				setTotalPosts((prev) => prev - 1);
+			}
+		} catch (error: any) {
+			alert(error.error || "Failed to delete post");
+		}
+	};
+
 	if (loading) {
 		return <div>Loading...</div>;
 	}
@@ -94,7 +107,7 @@ export default function Home() {
 				<TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />
 			)}
 
-			<PostCard posts={userPosts} />
+			<PostCard posts={userPosts} onDeletePost={handleDeletePost} />
 
 			<div className="flex justify-center p-5">
 				<button className="rounded-md p-[5px] px-[9px] ms-3 bg-primary">1</button>
