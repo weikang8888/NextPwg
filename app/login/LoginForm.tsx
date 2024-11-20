@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { login } from "../api";
 
 const LoginForm = () => {
 	const [email, setEmail] = useState("");
@@ -17,19 +18,7 @@ const LoginForm = () => {
 		setError(null);
 
 		try {
-			const response = await fetch("https://api-for-testing-gujp.onrender.com/api/account/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email, password }),
-			});
-
-			if (!response.ok) {
-				const { message = "Login failed" } = await response.json();
-				throw new Error(message);
-			}
-
-			const { token } = await response.json();
-
+			const { token } = await login(email, password);
 			localStorage.setItem("token", token);
 			router.push("/");
 		} catch (err) {
@@ -38,7 +27,6 @@ const LoginForm = () => {
 			setLoading(false);
 		}
 	};
-
 	return (
 		<form className="w-[400px]" onSubmit={handleLogin}>
 			<div className="flex flex-col gap-6 mx-6">
