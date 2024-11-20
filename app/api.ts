@@ -73,7 +73,7 @@ export const getUserPosts = async (
 	token: string,
 	page: number,
 	limit: number
-): Promise<{ posts: any[]; totalPosts: number }> => {
+): Promise<{ data: any[]; totalPosts: number }> => {
 	const response = await fetch(`${BASE_URL}/posts/mypost`, {
 		method: "POST",
 		headers: {
