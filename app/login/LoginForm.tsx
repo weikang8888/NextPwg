@@ -10,25 +10,62 @@ const LoginForm = () => {
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [validationErrors, setValidationErrors] = useState<{
+		email?: string;
+		password?: string;
+	}>({});
+
 	const router = useRouter();
+
+	const validateInputs = () => {
+		const errors: { username?: string; email?: string; password?: string } = {};
+
+		if (!email.trim()) {
+			errors.email = "Email is required.";
+		} else if (!/\S+@\S+\.\S+/.test(email)) {
+			errors.email = "Please enter a valid email.";
+		}
+		if (!password.trim()) {
+			errors.password = "Password is required.";
+		} else if (password.length < 6) {
+			errors.password = "Password must be at least 6 characters.";
+		}
+
+		setValidationErrors(errors);
+		return Object.keys(errors).length === 0;
+	};
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
+
 		setLoading(true);
 		setError(null);
 
+		if (!validateInputs()) {
+			setLoading(false);
+			return;
+		}
+
 		try {
 			const { token } = await login(email, password);
+
 			localStorage.setItem("token", token);
 			router.push("/");
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "An unknown error occurred.");
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				setError(error.message);
+			} else if (typeof error === "string") {
+				setError(error);
+			} else {
+				setError("An unknown error occurred.");
+			}
 		} finally {
 			setLoading(false);
 		}
 	};
+
 	return (
-		<form className="w-[400px]" onSubmit={handleLogin}>
+		<form className="w-[400px]" onSubmit={handleLogin} noValidate>
 			<div className="flex flex-col gap-6 mx-6">
 				<div>
 					<label className="text-black text-lg font-medium mb-1 mx-2 block">Email</label>
@@ -37,8 +74,11 @@ const LoginForm = () => {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 						required
-						className="w-full border-2 border-primary focus:outline-none focus:border-yellow-600 rounded-full p-[6px] text-black px-4"
+						className={`w-full border-2 ${
+							validationErrors.email ? "border-red-500" : "border-primary"
+						} focus:outline-none focus:border-yellow-600 rounded-full p-[6px] text-black px-4`}
 					/>
+					{validationErrors.email && <p className="text-red-500 text-sm mt-1 mx-2">{validationErrors.email}</p>}
 				</div>
 				<div>
 					<label className="text-black text-lg font-medium mb-1 mx-2 block">Password</label>
@@ -48,12 +88,14 @@ const LoginForm = () => {
 						minLength={6}
 						onChange={(e) => setPassword(e.target.value)}
 						required
-						className="w-full border-2 border-primary focus:outline-none focus:border-yellow-600 rounded-full p-[6px] text-black px-4"
+						className={`w-full border-2 ${
+							validationErrors.password ? "border-red-500" : "border-primary"
+						} focus:outline-none focus:border-yellow-600 rounded-full p-[6px] text-black px-4`}
 					/>
+					{validationErrors.password && <p className="text-red-500 text-sm mt-1 mx-2">{validationErrors.password}</p>}
 				</div>
 			</div>
 			<div className="flex flex-col items-center mt-12 mx-6">
-				{error && <p className="text-red-500 mb-4">{error}</p>}
 				<button
 					type="submit"
 					className={`${
@@ -62,7 +104,7 @@ const LoginForm = () => {
 					disabled={loading}>
 					{loading ? "Logging in..." : "Login"}
 				</button>
-
+				{error && <p className="text-red-500 mb-4">{error}</p>}
 				<Link href="/register" className="text-primary text-2xl font-medium hover:underline">
 					Create an account
 				</Link>
