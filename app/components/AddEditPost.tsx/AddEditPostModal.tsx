@@ -2,38 +2,39 @@
 
 import React, { useState, useEffect } from "react";
 import { Select } from "antd";
+import { addPost, editPost } from "@/app/api";
 
 const { Option } = Select;
 
 const tagsOptions = ["history", "american", "crime", "science", "fiction", "fantasy", "space", "adventure", "nature", "environment", "philosophy", "psychology", "health"];
 
-// Define Props Interface
 interface AddEditPostModalProps {
   onClose: () => void;
-  submit: (data: FormData) => void;
   initialValues?: FormData;
   showPopup: boolean;
+  postId: number | null;
+  onUpdatePosts: () => void;
 }
 
-// Define Form Data Interface
 interface FormData {
   title: string;
   body: string;
   tags: string[];
 }
 
-const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, initialValues, showPopup }) => {
+const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, initialValues, showPopup, postId, onUpdatePosts }) => {
   const [formData, setFormData] = useState<FormData>({
     title: "",
     body: "",
     tags: [],
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (!showPopup) {
       setFormData({ title: "", body: "", tags: [] });
+      setErrors({});
     } else if (initialValues) {
       setFormData(initialValues);
     }
@@ -45,7 +46,7 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, in
 
     setErrors((prevErrors) => ({
       ...prevErrors,
-      [id]: "",
+      [id]: "", // Clear error for this field
     }));
   };
 
@@ -54,7 +55,7 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, in
 
     setErrors((prevErrors) => ({
       ...prevErrors,
-      tags: "",
+      tags: "", // Clear error for tags
     }));
   };
 
@@ -67,12 +68,25 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, in
     return Object.keys(newErrors).length === 0 ? formData : null;
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const values = getValidatedValue();
     if (values) {
-      submit(values);
-      console.log(values);
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("User is not authenticated");
+        }
+        if (initialValues && postId !== null) {
+          await editPost({ token, postId: postId.toString(), ...values });
+        } else {
+          await addPost({ token, ...values });
+        }
+        onClose();
+        onUpdatePosts();
+      } catch (error: any) {
+        console.error("Error creating post:", error.message);
+      }
     }
   };
 
@@ -87,13 +101,27 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, in
               <label htmlFor="title" className="block text-sm font-medium text-black">
                 Title
               </label>
-              <input type="text" className="w-full px-3 py-2 border rounded focus:outline-none focus:ring text-black" id="title" value={formData.title} onChange={handleChange} />
+              <input
+                type="text"
+                className={`w-full border-2 ${errors.title ? "border-red-500" : "border-primary"} focus:outline-none focus:border-yellow-600 p-[6px] text-black px-4`}
+                id="title"
+                value={formData.title}
+                onChange={handleChange}
+              />
+              {errors.title && <div className="text-red-500 text-sm mt-1">{errors.title}</div>}
             </div>
+
             <div className="mb-4">
               <label htmlFor="body" className="block text-sm font-medium text-black">
                 Content
               </label>
-              <textarea className="w-full px-3 py-2 border rounded focus:outline-none focus:ring text-black" id="body" value={formData.body} onChange={handleChange} />
+              <textarea
+                className={`w-full border-2 ${errors.content ? "border-red-500" : "border-primary"} focus:outline-none focus:border-yellow-600 p-[6px] text-black px-4`}
+                id="body"
+                value={formData.body}
+                onChange={handleChange}
+              />
+              {errors.body && <div className="text-red-500 text-sm mt-1">{errors.body}</div>}
             </div>
             <div className="mb-4">
               <label htmlFor="tags" className="block text-sm font-medium text-black">
@@ -104,6 +132,7 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, in
                 value={formData.tags}
                 onChange={handleTagsChange}
                 style={{ width: "100%" }}
+                className={`w-full border-2 ${errors.tags ? "border-red-500" : "border-primary"} focus-visible:outline-none focus:outline-none focus:border-yellow-600 p-[6px] text-black px-4`}
                 getPopupContainer={(triggerNode) => triggerNode.parentNode}
                 dropdownStyle={{
                   zIndex: 10000,
@@ -114,9 +143,7 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, submit, in
                   </Option>
                 ))}
               </Select>
-              {/* {errors.tags && (
-                  <div className="text-danger ms-2 mt-1">{errors.tags}</div>
-                )} */}
+              {errors.tags && <div className="text-red-500 text-sm mt-1">{errors.tags}</div>}
             </div>
             <div className="flex justify-between mt-4">
               <button type="button" className="px-4 py-2 bg-[#fdeacd] rounded hover:bg-[#fcd7a5] text-black" onClick={onClose}>
