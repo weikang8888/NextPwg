@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import TotalPost from "./components/TotalPost";
 import PostCard from "./components/PostCard";
 import { getAllAccounts, getAllPosts, getUserPosts } from "./api";
-
+import { jwtDecode } from "jwt-decode";
 interface Post {
   id: number;
   userId: number;
@@ -20,6 +20,7 @@ export default function Home() {
   const [totalPosts, setTotalPosts] = useState<number>(0);
   const [myTotalPosts, setMyTotalPosts] = useState<number>(0);
   const [totalAccounts, setTotalAccounts] = useState<number>(0);
+  const [role, setRole] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -36,17 +37,21 @@ export default function Home() {
       }
 
       try {
-        setLoading(true);
+        const decodedToken: any = jwtDecode(token as string);
+        setRole(decodedToken.role);
 
-        const allPostsResponse = await getAllPosts(token as string, page, limit);
-        setTotalPosts(allPostsResponse.totalPosts || 0);
+        setLoading(true);
 
         const userPostsResponse = await getUserPosts(token as string, page, limit);
         setUserPosts(userPostsResponse.data || []);
         setMyTotalPosts(userPostsResponse.totalPosts || 0);
 
-        const getAllAccountsResponse = await getAllAccounts(token as string);
-        setTotalAccounts(getAllAccountsResponse.accounts.length);
+        if (decodedToken.role === "admin") {
+          const allPostsResponse = await getAllPosts(token as string, page, limit);
+          setTotalPosts(allPostsResponse.totalPosts || 0);
+          const getAllAccountsResponse = await getAllAccounts(token as string);
+          setTotalAccounts(getAllAccountsResponse.accounts.length);
+        }
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -56,7 +61,6 @@ export default function Home() {
 
     fetchPosts();
   }, [token]);
-
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -82,7 +86,9 @@ export default function Home() {
 
       <div className="text-center mt-3 mb-4 text-4xl">Post List</div>
 
-      <TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />
+      {role === "admin" && (
+        <TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />
+      )}
 
       <PostCard posts={userPosts} />
 
