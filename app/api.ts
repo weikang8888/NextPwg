@@ -134,3 +134,19 @@ export const editPost = async ({ token, postId, title, body, tags }: { token: st
 
   return response.json();
 };
+
+export const viewPost = async (token: string, postId: number) => {
+	const response = await fetch(`${BASE_URL}/posts/view/${postId}`, {
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${token}`,
+		},
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json();
+		throw new Error(errorData.message || "Failed to fetch post");
+	}
+
+	return response.json();
+};

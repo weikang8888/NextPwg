@@ -6,7 +6,11 @@ import TotalPost from "./components/TotalPost";
 import PostCard from "./components/PostCard";
 import { deletePost, getAllAccounts, getAllPosts, getUserPosts } from "./api";
 import { jwtDecode } from "jwt-decode";
+<<<<<<< Updated upstream
 import AddEditPostModal from "./components/AddEditPost.tsx/AddEditPostModal";
+=======
+import LoginRoute from "./components/LoginRoute/LoginRoute";
+>>>>>>> Stashed changes
 interface Post {
   id: number;
   userId: number;
@@ -85,6 +89,7 @@ export default function Home() {
     }
   };
 
+<<<<<<< Updated upstream
   const handleDeletePost = async (postId: number) => {
     try {
       await deletePost(postId);
@@ -97,6 +102,16 @@ export default function Home() {
       alert(error.error || "Failed to delete post");
     }
   };
+=======
+	return (
+		<div className="container mx-auto px-4">
+			<header className="flex justify-between items-center py-5">
+				<button type="button" className="bg-primary px-4 py-2 rounded-3xl">
+					Add New Post
+				</button>
+				<LoginRoute />
+			</header>
+>>>>>>> Stashed changes
 
   if (loading) {
     return <div>Loading...</div>;
