@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import errorIcon from "../../../assets/Error.png";
 import Image, { StaticImageData } from "next/image";
 
@@ -5,10 +6,20 @@ interface PopupProps {
   onClose?: () => void;
   imageSrc: string | StaticImageData;
   message?: string;
+  autoClose?: boolean;
 }
 
-const Popup: React.FC<PopupProps> = ({ onClose, imageSrc, message }) => {
+const Popup: React.FC<PopupProps> = ({ onClose, imageSrc, message, autoClose = false }) => {
   const resolvedImageSrc = typeof imageSrc === "string" ? imageSrc : imageSrc.src;
+
+  useEffect(() => {
+    if (autoClose) {
+      const timer = setTimeout(() => {
+        if (onClose) onClose();
+      }, 2000); // Auto close after 2 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [autoClose, onClose]);
 
   const isErrorIcon = typeof imageSrc === "object" && imageSrc.src === errorIcon.src;
 
