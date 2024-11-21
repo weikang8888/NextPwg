@@ -1,7 +1,7 @@
 "use client";
 
 import LoginRoute from "@/app/components/LoginRoute/LoginRoute";
-import { viewPost } from "../../api";
+import { viewPost } from "../api";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -24,7 +24,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: number }>
 				const { id } = await params;
 				const token = localStorage.getItem("token");
 
-				const postData = await viewPost(token as string, Number(id));
+				const postData = await viewPost(token as string, id);
 				setPost(postData);
 			} catch (err: any) {
 				setError(err.message || "Failed to fetch post");
@@ -53,14 +53,17 @@ export default function PostDetail({ params }: { params: Promise<{ id: number }>
 				<LoginRoute />
 			</header>
 
-			<div className="mt-10">
-				<h1 className="text-black text-3xl text-center mb-8">{post?.title}</h1>
-				<div className="p-6 bg-white shadow rounded-lg">
-					<p className="mb-4 text-gray-700">{post?.body}</p>
+			<div className="mt-6">
+				<h1 className="text-black text-3xl text-center mb-16">View Post</h1>
+				<div className="bg-white shadow rounded-lg px-20 pt-24 pb-20">
+					<h1 className="text-black text-3xl mb-6">{post?.title}</h1>
+					<p className=" text-gray-700 mb-6">{post?.body}</p>
 
 					<div className="mt-4">
 						{post?.tags.map((tag, index) => (
-							<span key={index} className="inline-block bg-secondary px-3 py-1 text-sm text-white rounded-lg mr-2">
+							<span
+								key={index}
+								className="inline-block bg-secondary px-4 py-1 text-sm text-black rounded-full mr-2 capitalize ">
 								{tag}
 							</span>
 						))}
