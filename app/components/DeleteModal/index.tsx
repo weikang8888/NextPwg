@@ -12,13 +12,13 @@ const DeletePopup: React.FC<DeletePopupProps> = ({ onClose, submit, title }) => 
       <div className="w-full h-full flex flex-col justify-center items-center">
         <div className="row justify-content-center">
           <div className="text-[25.72px] flex flex-col items-center">
-            <span className="text-[#ec9a1e]">{title}</span>
+            <span className="text-secondary">{title}</span>
             <p className="text-black my-4">Are you sure you want to delete this post?</p>
             <div className="flex justify-between gap-4 d-flex justify-content-between mt-5 px-4">
-              <button type="button" onClick={onClose} className="bg-[#fdeacd] border-2 border-[#fdeacd] rounded-full text-black w-full">
+              <button type="button" onClick={onClose} className="bg-accent border-2 border-accent rounded-lg text-black w-full p-2">
                 Cancel
               </button>
-              <button type="button" onClick={submit} className="rounded-full border-0 p-1 px-2 bg-red-500 text-white">
+              <button type="button" onClick={submit} className="rounded-lg border-0 px-2 bg-red-500 text-black p-2">
                 Delete
               </button>
             </div>

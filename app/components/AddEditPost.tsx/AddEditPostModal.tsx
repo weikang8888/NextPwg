@@ -146,10 +146,10 @@ const AddEditPostModal: React.FC<AddEditPostModalProps> = ({ onClose, initialVal
               {errors.tags && <div className="text-red-500 text-sm mt-1">{errors.tags}</div>}
             </div>
             <div className="flex justify-between mt-4">
-              <button type="button" className="px-4 py-2 bg-[#fdeacd] rounded hover:bg-[#fcd7a5] text-black" onClick={onClose}>
+              <button type="button" className="px-4 py-2 bg-danger rounded hover:bg-[#e65146] text-black" onClick={onClose}>
                 Cancel
               </button>
-              <button type="submit" className="px-4 py-2 text-black rounded bg-[#f8b959] hover:bg-[#f1a22a]">
+              <button type="submit" className="px-4 py-2 text-black rounded bg-mint hover:bg-[#70a6f7]">
                 Submit
               </button>
             </div>
