@@ -30,12 +30,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [postId, setPostId] = useState<number | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [limit] = useState<number>(10);
   const router = useRouter();
 
   const token = localStorage.getItem("token");
-  const page = 1;
-  const limit = 10;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -51,16 +50,13 @@ export default function Home() {
         const decodedToken: any = jwtDecode(token);
         setRole(decodedToken.role);
 
-        // Fetch user posts
-        const page = 1;
-        const limit = 10;
-        const userPostsResponse = await getUserPosts(token, page, limit);
+        const userPostsResponse = await getUserPosts(token, currentPage, limit);
         setUserPosts(userPostsResponse.data || []);
         setMyTotalPosts(userPostsResponse.totalPosts || 0);
 
         // If the user is admin, fetch additional data
         if (decodedToken.role === "admin") {
-          const allPostsResponse = await getAllPosts(token, page, limit);
+          const allPostsResponse = await getAllPosts(token, currentPage, limit);
           setTotalPosts(allPostsResponse.totalPosts || 0);
 
           const allAccountsResponse = await getAllAccounts(token);
@@ -74,12 +70,12 @@ export default function Home() {
     };
 
     fetchPosts();
-  }, [router]);
+  }, [router, currentPage]); 
 
   const fetchLatestPosts = async () => {
     try {
       if (token) {
-        const userPostsResponse = await getUserPosts(token, page, limit);
+        const userPostsResponse = await getUserPosts(token, currentPage, limit);
         setUserPosts(userPostsResponse.data || []);
         setMyTotalPosts(userPostsResponse.totalPosts || 0);
       }
@@ -139,6 +135,29 @@ export default function Home() {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const renderPaginationButtons = () => {
+    const totalPages = Math.ceil(myTotalPosts / limit);
+
+    return (
+      <div className="pagination-container flex justify-center p-5">
+        {Array.from({ length: totalPages || 1 }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            className={`pagination-button rounded-md p-[5px] px-[9px] ms-3 ${
+              currentPage === page ? "bg-[#F8B959] text-white" : "bg-white"
+            }`}
+            onClick={() => handlePageChange(page)}>
+            {page}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4">
       <header className="flex justify-between items-center py-5">
@@ -157,17 +176,21 @@ export default function Home() {
 
       <div className="text-center mt-3 mb-4 text-4xl">Post List</div>
 
-      {role === "admin" && <TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />}
+      {role === "admin" && (
+        <TotalPost myTotalPosts={myTotalPosts} totalAccount={totalAccounts} totalPosts={totalPosts} />
+      )}
 
       <PostCard posts={userPosts} onDeletePost={handleClickDelete} onEditPost={handleClickEdit} />
 
-      <div className="flex justify-center p-5">
-        <button className="rounded-md p-[5px] px-[9px] ms-3 bg-primary">1</button>
-      </div>
+      {renderPaginationButtons()}
 
       <AddEditPostModal
         onClose={handleClose}
-        initialValues={selectedPost ? { title: selectedPost.title, body: selectedPost.body, tags: selectedPost.tags } : { title: "", body: "", tags: [] }}
+        initialValues={
+          selectedPost
+            ? { title: selectedPost.title, body: selectedPost.body, tags: selectedPost.tags }
+            : { title: "", body: "", tags: [] }
+        }
         showPopup={showPopUp}
         postId={postId}
         onUpdatePosts={fetchLatestPosts}
