@@ -9,14 +9,17 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				background: "var(--background)",
-				foreground: "var(--foreground)",
-				primary: "#F8B959",
-				secondary: "#FDEACD",
+				background: "#1C1C1E",
+				foreground: "#2C2C2E",
+				secondaryBtn: "#2196F3",
+				primaryBtn: "#2563EB",
 				danger: "#F95A50",
-				accent: "#E6A5A1",
+				accent: "#EF4444",
 				white: "#FFFFFF",
-				mint: "#B4F3B4",
+				title: "#EDEDED",
+				subtitle: "#A1A1AA",
+				tags: "#14B8A6",
+				tint: "rgba(0, 0, 0, 0.5)",
 			},
 		},
 	},

@@ -47,23 +47,23 @@ export default function PostDetail({ params }: { params: Promise<{ id: number }>
 	return (
 		<div className="container mx-auto px-4 py-14">
 			<header className="flex justify-between items-center py-5">
-				<Link href="/" type="button" className="bg-primary px-10 py-2 rounded-3xl">
+				<Link href="/" type="button" className="bg-primaryBtn px-10 py-2 rounded-3xl">
 					Back
 				</Link>
 				<LoginRoute />
 			</header>
 
 			<div className="mt-6">
-				<h1 className="text-black text-3xl text-center mb-16">View Post</h1>
-				<div className="bg-white shadow rounded-lg px-20 pt-24 pb-20">
-					<h1 className="text-black text-3xl mb-6">{post?.title}</h1>
-					<p className=" text-gray-700 mb-6">{post?.body}</p>
+				<h1 className="text-title text-3xl text-center mb-16">View Post</h1>
+				<div className="bg-foreground shadow rounded-lg px-20 pt-24 pb-20">
+					<h1 className="text-title text-3xl mb-6">{post?.title}</h1>
+					<p className=" text-subtitle mb-6">{post?.body}</p>
 
 					<div className="mt-4">
 						{post?.tags.map((tag, index) => (
 							<span
 								key={index}
-								className="inline-block bg-secondary px-4 py-1 text-sm text-black rounded-full mr-2 capitalize ">
+								className="inline-block bg-tags px-4 py-1 text-sm text-black rounded-full mr-2 capitalize">
 								{tag}
 							</span>
 						))}
